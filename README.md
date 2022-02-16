@@ -191,24 +191,24 @@ env-update && source /etc/profile && export PS1="(chroot) $PS1"
 `vi /etc/conf.d/hostname`
 ### 4.4 配置网络
 `vi /etc/conf.d/net`
->config_enp34s0="null"
-bridge_br0="enp34s0 tap1 tap2 tap3"
-rc_net_br0_need="net.enp34s0 net.tap1 net.tap2 net.tap3"
-config_br0="172.16.26.126/16 fd00::32/64"
-routes_br0="default via 172.16.26.2
-default via fd00::1"
-bridge_forward_delay_br0=0
-bridge_hello_time_br0=1000
-bridge_stp_state_br0=0
-config_tap1="null"
-tuntap_tap1="tap"
-iproute2_tap1="user root"
-config_tap2="null"
-tuntap_tap2="tap"
-iproute2_tap2="user root"
-config_tap3="null"
-tuntap_tap3="tap"
-iproute2_tap3="user root"
+>config_enp34s0="null"<Br/>
+bridge_br0="enp34s0 tap1 tap2 tap3"<Br/>
+rc_net_br0_need="net.enp34s0 net.tap1 net.tap2 net.tap3"<Br/>
+config_br0="172.16.26.126/16 fd00::32/64"<Br/>
+routes_br0="default via 172.16.26.2<Br/>
+default via fd00::1"<Br/>
+bridge_forward_delay_br0=0<Br/>
+bridge_hello_time_br0=1000<Br/>
+bridge_stp_state_br0=0<Br/>
+config_tap1="null"<Br/>
+tuntap_tap1="tap"<Br/>
+iproute2_tap1="user root"<Br/>
+config_tap2="null"<Br/>
+tuntap_tap2="tap"<Br/>
+iproute2_tap2="user root"<Br/>
+config_tap3="null"<Br/>
+tuntap_tap3="tap"<Br/>
+iproute2_tap3="user root"<Br/>
 ### 4.5 配置hosts
 `vi /etc/hosts`
 >127.0.0.1 localhost<Br/>
