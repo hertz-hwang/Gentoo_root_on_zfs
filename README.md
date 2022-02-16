@@ -138,7 +138,7 @@ nano -w /etc/portage/repos.conf/gentoo.conf
 >[DEFAULT]<Br/>
 main-repo = gentoo<Br/>
 <Br/>
-[gentoo]<Br/>
+>[gentoo]<Br/>
 location = /var/db/repos/gentoo<Br/>
 sync-type = git<Br/>
 sync-uri = https://mirrors.ustc.edu.cn/gentoo.git<Br/>
