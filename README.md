@@ -108,8 +108,7 @@ MAKEOPTS="-j13"<Br/>
 EMERGE\_DEFAULT\_OPTS="--keep-going --with-bdeps=y --autounmask-write=y --jobs=2 -l"<Br/>
 AUTO\_CLEAN="yes"<Br/>
 GENTOO\_MIRRORS="https://mirrors.ustc.edu.cn/gentoo"<Br/>
-<Br/>
-\#FEATURES="\${FEATURES} -userpriv -usersandbox -sandbox"<Br/>
+#FEATURES="\${FEATURES} -userpriv -usersandbox -sandbox"<Br/>
 <Br/>
 GRUB\_PLATFORMS="efi-64"<Br/>
 ACCEPT\_KEYWORDS="amd64"<Br/>
