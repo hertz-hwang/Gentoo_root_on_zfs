@@ -209,6 +209,18 @@ iproute2_tap2="user root"<Br/>
 config_tap3="null"<Br/>
 tuntap_tap3="tap"<Br/>
 iproute2_tap3="user root"<Br/>
+````
+ln -s /etc/init.d/net.lo /etc/init.d/net.br0
+ln -s /etc/init.d/net.lo /etc/init.d/net.enp34s0
+ln -s /etc/init.d/net.lo /etc/init.d/net.tap1
+ln -s /etc/init.d/net.lo /etc/init.d/net.tap2
+ln -s /etc/init.d/net.lo /etc/init.d/net.tap3
+rc-update add net.br0 default
+rc-update add net.enp34s0 default
+rc-update add net.tap1 default
+rc-update add net.tap2 default
+rc-update add net.tap3 default
+````
 ### 4.5 配置hosts
 `vi /etc/hosts`
 >127.0.0.1 localhost<Br/>
