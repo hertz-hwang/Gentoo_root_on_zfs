@@ -192,14 +192,11 @@ env-update && source /etc/profile && export PS1="(chroot) $PS1"
 ### 4.4 配置网络
 `vi /etc/conf.d/net`
 >config\_enp34s0="null"<Br/>
- <Br/>
 bridge\_br0="enp34s0 tap1 tap2 tap3"<Br/>
 rc\_net\_br0\_need="net.enp34s0 net.tap1 net.tap2 net.tap3"<Br/>
- <Br/>
 config\_br0="172.16.26.126/16 fd00::32/64"<Br/>
 routes\_br0="default via 172.16.26.2<Br/>
 default via fd00::1"<Br/>
- <Br/>
 bridge\_forward\_delay\_br0=0<Br/>
 bridge\_hello\_time\_br0=1000<Br/>
 bridge\_stp\_state\_br0=0<Br/>
