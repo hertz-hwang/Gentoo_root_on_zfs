@@ -109,7 +109,6 @@ EMERGE\_DEFAULT\_OPTS="--keep-going --with-bdeps=y --autounmask-write=y --jobs=2
 AUTO\_CLEAN="yes"<Br/>
 GENTOO\_MIRRORS="https://mirrors.ustc.edu.cn/gentoo"<Br/>
 #FEATURES="\${FEATURES} -userpriv -usersandbox -sandbox"<Br/>
-<Br/>
 GRUB\_PLATFORMS="efi-64"<Br/>
 ACCEPT\_KEYWORDS="amd64"<Br/>
 ACCEPT\_LICENSE="*"<Br/>
@@ -117,7 +116,6 @@ L10N="en-US zh-CN en zh"<Br/>
 LINGUAS="en_US zh_CN en zh"<Br/>
 VIDEO_CARDS="nvidia"<Br/>
 INPUT_DEVICES="libinput"<Br/>
-<Br/>
 FUCKDE="-gnome -gnome-shell -gnome-online-accounts -gnome-keyring -nautilus -kde"<Br/>
 FUCKSV="-bindist -jumbo-build -mdev elogind -oss -plymouth -systemd"<Br/>
 SOFTWARE="-icu udev blkid efi acpi ccache dbus policykit udisks"<Br/>
@@ -126,7 +124,6 @@ NET="network -networkmanager -ipv6 -dhcpcd -ppp -qtwebengine -webengine"<Br/>
 VIDEO="X -wayland nvidia xinerama"<Br/>
 ELSE="-bluetooth -cups cjk emoji"<Br/>
 USE="\${FUCKDE} \${FUCKSV} \${SOFTWARE} \${AUDIO} \${NET} \${VIDEO} \${ELSE}"<Br/>
-<Br/>
 \# Ccache<Br/>
 \# FEATURES="parallel-fetch ccache"<Br/>
 \# CCACHE_DIR="/var/cache/ccache"<Br/>
