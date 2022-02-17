@@ -29,7 +29,7 @@ zpool create -f \
 -O xattr=sa \
 -m none -R /mnt/gentoo zroot /dev/disk/by-id/ata-...-part2
 ```
-### 1.6 创建vdev以及dataset
+### 1.6 创建dataset
 ```
 zfs create -o mountpoint=none -o canmount=off zroot/ROOT
 zfs create -o mountpoint=none -o canmount=off zroot/DATA
