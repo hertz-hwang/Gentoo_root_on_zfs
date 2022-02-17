@@ -2,12 +2,12 @@
 # 基于根目录为zfs文件系统的Gentoo安装过程
 ## 1. 磁盘准备
 ### 1.1 写入GPT分区表
-`sgdisk -Z /dev/sdX`
+`sgdisk -Z /dev/nvme0n1`
 ### 1.2 擦除磁盘签名
-`wipefs -a /dev/sdX`
+`wipefs -a /dev/nvme0n1`
 ### 1.3 使用parted工具来创建分区
 ```
-parted --script -a optimal /dev/sdX \
+parted --script -a optimal /dev/nvme0n1 \
 unit mib \
 mklabel gpt \
 mkpart esp 1 1025 \
@@ -15,7 +15,7 @@ mkpart rootfs 1025 100% \
 set 1 boot on
 ```
 ### 1.4 格式化boot分区
-`mkfs.vfat -F32 -n EFI /dev/sdX1`
+`mkfs.vfat -F32 -n EFI /dev/nvme0n1p1`
 ### 1.5 创建zpool池
 ```
 zpool create -f \
@@ -27,7 +27,7 @@ zpool create -f \
 -O relatime=on \
 -O atime=off \
 -O xattr=sa \
--m none -R /mnt/gentoo zroot /dev/disk/by-id/ata-...-part2
+-m none -R /mnt/gentoo zroot /dev/nvme0n1p2
 ```
 ### 1.6 创建dataset
 ```
@@ -45,7 +45,7 @@ zfs create -V 32G -b 8192 -o logbias=throughput -o sync=always -o primarycache=m
 ### 1.8 挂载文件系统 (zfs文件系统能够自管理，在创建的时候就已经自己挂载到指定目录了)
 ```
 mkdir -p /mnt/gentoo/boot
-mount /dev/sda1 /mnt/gentoo/boot
+mount /dev/nvme0n1p1 /mnt/gentoo/boot
 mkswap /dev/zvol/zroot/SWAP
 swapon /dev/zvol/zroot/SWAP
 ```
@@ -56,16 +56,16 @@ cp /etc/zfs/zpool.cache /mnt/gentoo/etc/zfs/zpool.cache
 ```
 ### 2.0 (可选) 后续如果需要进入chroot环境，执行以下操作
 ```
-zpool import -d /dev/sdX2 -R /mnt/gentoo zroot -N
+zpool import -d /dev/nvme0n1p2 -R /mnt/gentoo zroot -N
 zfs mount -a
-mount /dev/sda1 /mnt/gentoo/boot/
+mount /dev/nvme0n1p1 /mnt/gentoo/boot/
 swapon /dev/zvol/zroot/SWAP
 mount --types proc /proc /mnt/gentoo/proc
 mount --rbind /sys /mnt/gentoo/sys
 mount --rbind /dev /mnt/gentoo/dev
 test -L /dev/shm && rm /dev/shm && mkdir /dev/shm
 mount --types tmpfs --options nosuid,nodev,noexec shm /dev/shm
-chmod 1777 /dev/shm
+chmod 1777 /dev/shm /run/shm
 chroot /mnt/gentoo /bin/bash
 source /etc/profile
 export PS1="(chroot) $PS1"
@@ -86,7 +86,7 @@ mount --rbind /sys /mnt/gentoo/sys
 mount --rbind /dev /mnt/gentoo/dev
 test -L /dev/shm && rm /dev/shm && mkdir /dev/shm
 mount --types tmpfs --options nosuid,nodev,noexec shm /dev/shm
-chmod 1777 /dev/shm
+chmod 1777 /dev/shm /run/shm
 ```
 ### 2.4 复制DNS信息到新系统下
 `cp --dereference /etc/resolv.conf /mnt/gentoo/etc/`
@@ -101,17 +101,17 @@ export PS1="(chroot) $PS1"
 nano -w /etc/portage/make.conf
 ```
 #### 部分参数
->COMMON\_FLAGS="-O3 -march=znver2 -pipe"<Br/>
-CHOST="x86\_64-pc-linux-gnu"<Br/>
-CPU\_FLAGS\_X86="aes avx avx2 f16c fma3 mmx mmxext pclmul popcnt rdrand sha sse sse2 sse3 sse4\_1 sse4\_2 sse4a ssse3"<Br/>
+>COMMON_FLAGS="-O3 -march=znver2 -pipe"<Br/>
+CHOST="x86_64-pc-linux-gnu"<Br/>
+CPU_FLAGS_X86="aes avx avx2 f16c fma3 mmx mmxext pclmul popcnt rdrand sha sse sse2 sse3 sse4_1 sse4_2 sse4a ssse3"<Br/>
 MAKEOPTS="-j13"<Br/>
-EMERGE\_DEFAULT\_OPTS="--keep-going --with-bdeps=y --autounmask-write=y --jobs=2 -l"<Br/>
-AUTO\_CLEAN="yes"<Br/>
-GENTOO\_MIRRORS="https://mirrors.ustc.edu.cn/gentoo"<Br/>
-#FEATURES="\${FEATURES} -userpriv -usersandbox -sandbox"<Br/>
-GRUB\_PLATFORMS="efi-64"<Br/>
-ACCEPT\_KEYWORDS="amd64"<Br/>
-ACCEPT\_LICENSE="*"<Br/>
+EMERGE_DEFAULT_OPTS="--keep-going --with-bdeps=y --autounmask-write=y --jobs=2 -l"<Br/>
+AUTO_CLEAN="yes"<Br/>
+GENTOO_MIRRORS="https://mirrors.ustc.edu.cn/gentoo"<Br/>
+#FEATURES="${FEATURES} -userpriv -usersandbox -sandbox"<Br/>
+GRUB_PLATFORMS="efi-64"<Br/>
+ACCEPT_KEYWORDS="amd64"<Br/>
+ACCEPT_LICENSE="*"<Br/>
 L10N="en-US zh-CN en zh"<Br/>
 LINGUAS="en_US zh_CN en zh"<Br/>
 VIDEO_CARDS="nvidia"<Br/>
@@ -124,9 +124,9 @@ NET="network -networkmanager -ipv6 -dhcpcd -ppp -qtwebengine -webengine"<Br/>
 VIDEO="X -wayland nvidia xinerama"<Br/>
 ELSE="-bluetooth -cups cjk emoji"<Br/>
 USE="\${FUCKDE} \${FUCKSV} \${SOFTWARE} \${AUDIO} \${NET} \${VIDEO} \${ELSE}"<Br/>
-\# Ccache<Br/>
-\# FEATURES="parallel-fetch ccache"<Br/>
-\# CCACHE_DIR="/var/cache/ccache"<Br/>
+#Ccache<Br/>
+#FEATURES="parallel-fetch ccache"<Br/>
+#CCACHE_DIR="/var/cache/ccache"<Br/>
 ### 2.7 同步镜像站中最新的软件快照
 `emerge-webrsync`
 ### 2.8 配置git方式来同步ebuild数据库
@@ -149,7 +149,7 @@ emerge --sync
 ### 2.9 选择profile
 ```
 eselect profile list
-eselect profile set Y
+eselect profile set 5
 ```
 ### 2.10 更新world集合
 `emerge -avuDN @world`
@@ -254,6 +254,8 @@ grub-install --target=x86_64-efi --efi-directory=/boot
 vi /etc/default/grub
 grub-mkconfig -o /boot/grub/grub.cfg
 ```
+>例如:<Br/> 
+`GRUB_CMDLINE_LINUX="dozfs=cache quiet amd_iommu=on iommu=pt loglevel=5 nowatchdog"`
 ## 8. 新建用户
 ```
 useradd -mG users,wheel,portage,usb,input,audio,video,sys,adm,tty,disk,lp,mem,news,console,cdrom,sshd,kvm,render,lpadmin,cron,crontab -s /bin/zsh jaus
