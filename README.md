@@ -260,6 +260,7 @@ grub-mkconfig -o /boot/grub/grub.cfg
 ```
 useradd -mG users,wheel,portage,usb,input,audio,video,sys,adm,tty,disk,lp,mem,news,console,cdrom,sshd,kvm,render,lpadmin,cron,crontab -s /bin/zsh jaus
 passwd jaus
+echo "permit :wheel" > /etc/doas.conf
 ```
 ## 9. 使用zfs snapshot创建新系统快照
 ```
