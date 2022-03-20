@@ -44,12 +44,12 @@ zpool create -f \
 ### 1.6 创建dataset
 ```
 zfs create -o mountpoint=none -o canmount=off ${ZPOOL}/ROOT
-zfs create -o mountpoint=none -o canmount=off ${ZPOOL}/DATA
+zfs create -o mountpoint=none -o canmount=off ${ZPOOL}/data
 zfs create -o mountpoint=/ ${ZPOOL}/ROOT/default
-zfs create -o mountpoint=/home ${ZPOOL}/DATA/home
-zfs create -o mountpoint=/var/db/repos ${ZPOOL}/DATA/ebuild
-zfs create -o mountpoint=/var/cache/distfiles ${ZPOOL}/DATA/distfiles
-zfs create -o mountpoint=/var/cache/ccache ${ZPOOL}/DATA/ccache
+zfs create -o mountpoint=/home ${ZPOOL}/data/home
+zfs create -o mountpoint=/var/db/repos ${ZPOOL}/data/ebuild
+zfs create -o mountpoint=/var/cache/distfiles ${ZPOOL}/data/distfiles
+zfs create -o mountpoint=/var/cache/ccache ${ZPOOL}/data/ccache
 zfs create -V 32G -b 8192 -o logbias=throughput -o sync=always -o primarycache=metadata ${ZPOOL}/SWAP
 ```
 ### 1.7 配置zpool bootfs
