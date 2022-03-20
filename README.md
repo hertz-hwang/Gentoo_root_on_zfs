@@ -21,7 +21,7 @@ mkpart esp 1 1025 \
 mkpart rootfs 1025 100% \
 set 1 boot on
 ```
-### 1.3.2 使用sgdisk创建分区
+### 1.3.2 (可选) 使用sgdisk创建分区
 ```
 sgdisk -n1:1M:+1G	-t1:EF00 ${DISK}
 sgdisk -n2:0:0		-t2:BF00 ${DISK}
