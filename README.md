@@ -85,6 +85,7 @@ export PS1="(chroot) $PS1"
 ```
 ## 2. 安装基本系统
 ### 2.1 校验系统时间
+`ntpd -q -g`<Br/>
 `date`
 ### 2.2 下载stage3到/mnt/gentoo下
 ```
