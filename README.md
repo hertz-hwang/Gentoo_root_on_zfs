@@ -7,6 +7,9 @@ MOUNT=/mnt/gentoo
 ZPOOL=zroot
 STAGE3=[stage3 mirror address]
 ```
+[USTC mirrors](https://mirrors.ustc.edu.cn/)<Br/>
+[TUNA mirrors](https://mirrors.tuna.tsinghua.edu.cn/)<Br/>
+[BFSU mirrors](https://mirrors.bfsu.edu.cn/)
 ## 1. 磁盘准备
 ### 1.1 擦除磁盘签名
 `wipefs -a ${DISK}`
