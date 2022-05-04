@@ -134,7 +134,6 @@ L10N="en-US zh-CN en zh"<Br/>
 LINGUAS="en_US zh_CN en zh"<Br/>
 VIDEO_CARDS="nvidia"<Br/>
 INPUT_DEVICES="libinput"<Br/>
-FUCKDE="-gnome -gnome-shell -gnome-online-accounts -gnome-keyring -nautilus -kde"<Br/>
 #USE<Br/>
 MASKU="-wayland -bindist -jumbo-build -mdev -oss -systemd -qtwebengine -webengine -consolekit -bluetooth -networkmanager -ppp -gnome -gnome-shell -gnome-online-accounts -gnome-keyring -nautilus -kde -plymouth -icu"<Br/>
 LIKEU="X xinerama elogind udev blkid efi acpi ccache dbus policykit udisks alsa pulseaudio jack lv2 sf2 grub cjk emoji zsh-completion nvenc"<Br/>
