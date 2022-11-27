@@ -1,7 +1,6 @@
-[toc]
 # 基于根目录为zfs文件系统的Gentoo安装过程
 ## 0. 配置参数
-```
+```shell
 DISK=/dev/disk/by-id/nvme-INTEL_SSDPEKKW512G8_BTHH812205BA512D
 MOUNT=/mnt/gentoo
 ZPOOL=zroot
@@ -12,11 +11,15 @@ STAGE3=[stage3 mirror address]
 [BFSU mirrors](https://mirrors.bfsu.edu.cn/)
 ## 1. 磁盘准备
 ### 1.1 擦除磁盘签名
-`wipefs -a ${DISK}`
-### 1.2 写入GPT分区表
-`sgdisk -Z ${DISK}`
-### 1.3.1 使用parted工具来创建分区
+```shell
+wipefs -af ${DISK}
 ```
+### 1.2 写入GPT分区表
+```shell
+sgdisk -Zo ${DISK}
+```
+### 1.3.1 使用parted工具来创建分区
+```shell
 parted --script -a optimal ${DISK} \
 unit mib \
 mklabel gpt \
@@ -25,14 +28,16 @@ mkpart rootfs 1025 100% \
 set 1 boot on
 ```
 ### 1.3.2 (可选) 使用sgdisk创建分区
-```
+```shell
 sgdisk -n1:1M:+1G	-t1:EF00 ${DISK}
 sgdisk -n2:0:0		-t2:BF00 ${DISK}
 ```
 ### 1.4 格式化boot分区
-`mkfs.vfat -F32 -n EFI ${DISK}-part1`
-### 1.5 创建zpool池
+```shell
+mkfs.vfat -F32 -n EFI ${DISK}-part1
 ```
+### 1.5 创建zpool池
+```shell
 zpool create -f \
 -o ashift=12 \
 -o cachefile=/etc/zfs/zpool.cache \
@@ -45,7 +50,7 @@ zpool create -f \
 -m none -R ${MOUNT} ${ZPOOL} ${DISK}-part2
 ```
 ### 1.6 创建dataset
-```
+```shell
 zfs create -o mountpoint=none -o canmount=off ${ZPOOL}/ROOT
 zfs create -o mountpoint=none -o canmount=off ${ZPOOL}/data
 zfs create -o mountpoint=/ ${ZPOOL}/ROOT/default
@@ -56,21 +61,23 @@ zfs create -o mountpoint=/var/cache/ccache ${ZPOOL}/data/ccache
 zfs create -V 32G -b 8192 -o logbias=throughput -o sync=always -o primarycache=metadata ${ZPOOL}/SWAP
 ```
 ### 1.7 配置zpool bootfs
-`zpool set bootfs=${ZPOOL}/ROOT/default ${ZPOOL}`
-### 1.8 挂载文件系统 (zfs文件系统能够自管理，在创建的时候就已经自己挂载到指定目录了)
+```shell
+zpool set bootfs=${ZPOOL}/ROOT/default ${ZPOOL}
 ```
+### 1.8 挂载文件系统 (zfs文件系统能够自管理，在创建的时候就已经自己挂载到指定目录了)
+```shell
 mkdir -p ${MOUNT}/boot
 mount ${DISK}-part1 ${MOUNT}/boot
 mkswap /dev/zvol/${ZPOOL}/SWAP
 swapon /dev/zvol/${ZPOOL}/SWAP
 ```
 ### 1.9 复制zfs缓存
-```
+```shell
 mkdir -p ${ZPOOL}/etc/zfs
 cp /etc/zfs/zpool.cache ${ZPOOL}/etc/zfs/zpool.cache
 ```
 ### 2.0 (可选) 后续如果需要进入chroot环境，执行以下操作
-```
+```shell
 zpool import -d ${DISK}-part2 -R ${MOUNT} ${ZPOOL} -N
 zfs mount -a
 mount ${DISK}-part1 ${MOUNT}/boot/
@@ -88,16 +95,18 @@ export PS1="(chroot) $PS1"
 ```
 ## 2. 安装基本系统
 ### 2.1 校验系统时间
-`ntpd -q -g`<Br/>
-`date`
+```shell
+ntpd -q -g
+date
+```<Br/>
 ### 2.2 下载stage3到/mnt/gentoo下
-```
+```shell
 cd ${MOUNT}
 wget ${STAGE3}
 tar xvf stage3-*.tar.xz --xattrs-include='*.*' --numeric-owner
 ```
 ### 2.3 挂载必要的其他文件系统
-```
+```shell
 mount --types proc /proc ${MOUNT}/proc
 mount --rbind /sys ${MOUNT}/sys
 mount --rbind /dev ${MOUNT}/dev
@@ -107,19 +116,21 @@ mount --types tmpfs --options nosuid,nodev,noexec shm /dev/shm
 chmod 1777 /dev/shm /run/shm
 ```
 ### 2.4 复制DNS信息到新系统下
-`cp --dereference /etc/resolv.conf ${MOUNT}/etc/`
-### 2.5 进入chroot环境
+```shell
+cp --dereference /etc/resolv.conf ${MOUNT}/etc/
 ```
+### 2.5 进入chroot环境
+```shell
 chroot ${MOUNT} /bin/bash
 source /etc/profile
 export PS1="(chroot) $PS1"
 ```
 ### 2.6 配置portage参数
-```
+```shell
 nano -w /etc/portage/make.conf
 ```
 #### 部分参数
->COMMON_FLAGS="-O2 -march=znver2 -pipe"<Br/>
+>COMMON_FLAGS="-O2 -march=native -pipe"<Br/>
 CHOST="x86_64-pc-linux-gnu"<Br/>
 CPU_FLAGS_X86="aes avx avx2 f16c fma3 mmx mmxext pclmul popcnt rdrand sha sse sse2 sse3 sse4_1 sse4_2 sse4a ssse3"<Br/>
 MAKEOPTS="-j13"<Br/>
@@ -130,22 +141,20 @@ GENTOO_MIRRORS="https://mirrors.ustc.edu.cn/gentoo"<Br/>
 GRUB_PLATFORMS="efi-64"<Br/>
 ACCEPT_KEYWORDS="amd64"<Br/>
 ACCEPT_LICENSE="*"<Br/>
-L10N="en-US zh-CN en zh"<Br/>
-LINGUAS="en_US zh_CN en zh"<Br/>
-VIDEO_CARDS="nvidia"<Br/>
-INPUT_DEVICES="libinput"<Br/>
 #USE<Br/>
 MASKU="-wayland -bindist -jumbo-build -mdev -oss -systemd -qtwebengine -webengine -consolekit -bluetooth -networkmanager -ppp -gnome -gnome-shell -gnome-online-accounts -gnome-keyring -nautilus -kde -plymouth -icu"<Br/>
 LIKEU="X xinerama elogind udev blkid efi acpi ccache dbus policykit udisks alsa pulseaudio jack lv2 sf2 grub cjk emoji zsh-completion nvenc"<Br/>
-USE="\${MASKU} \${LIKEU}"<Br/>
+USE="${MASKU} ${LIKEU}"<Br/>
 #Ccache<Br/>
 #FEATURES="parallel-fetch ccache"<Br/>
 #CCACHE_DIR="/var/cache/ccache"<Br/>
 
 ### 2.7 同步镜像站中最新的软件快照
-`emerge-webrsync`
-### 2.8 配置git方式来同步ebuild数据库
+```shell
+emerge-webrsync
 ```
+### 2.8 配置git方式来同步ebuild数据库
+```shell
 emerge -av dev-vcs/git dev-util/ccache app-editors/neovim
 eselect vi set nvim
 eselect editor set vi
@@ -161,19 +170,21 @@ sync-type = git<Br/>
 sync-uri = https://mirrors.ustc.edu.cn/gentoo.git<Br/>
 sync-depth = 1
 auto-sync = yes
-```
+```shell
 rm -rf /var/db/repos/gentoo
 emerge --sync
 ```
 ### 2.9 选择profile
-```
+```shell
 eselect profile list
 eselect profile set 5
 ```
 ### 2.10 更新world集合
-`emerge -avuDN @world`
-## 3. 配置内核
+```shell
+emerge -avuDN @world
 ```
+## 3. 配置内核
+```shell
 echo "sys-kernel/gentoo-kernel-bin -initramfs" > /etc/portage/package.use/gentoo-kernel-bin
 echo "sys-fs/zfs dist-kernel" > /etc/portage/package.use/zfs
 echo "sys-fs/zfs-kmod dist-kernel" >> /etc/portage/package.use/zfs
@@ -193,7 +204,7 @@ genkernel initramfs --compress-initramfs --kernel-config=/usr/src/linux/.config 
 ```
 ## 4. 配置系统
 ### 4.1 本地化配置
-```
+```shell
 echo "Asia/Shanghai" > /etc/timezone
 rm -rf /etc/localtime
 emerge --config sys-libs/timezone-data
@@ -204,16 +215,20 @@ eselect locale set en_US.UTF-8
 env-update && source /etc/profile && export PS1="(chroot) $PS1"
 ```
 ### 4.2 配置fstab (这里使用archlinux的一个工具genfstab来自动生成fstab)
-```
+```shell
 git clone https://github.com/26hz/install-tools.git
 cd install-tools
 ./genfstab -U -p / >> /etc/fstab
 因为zfs能够自行管理dataset，不需要在fstab中指定挂载选项，之后需要删除zfs文件系统的相关段落
 ```
 ### 4.3 配置主机名
-`vi /etc/conf.d/hostname`
+```shell
+vi /etc/conf.d/hostname
+```
 ### 4.4 配置网络
-`vi /etc/conf.d/net`
+```shell
+vi /etc/conf.d/net
+```
 >config_enp34s0="null"<Br/>
 bridge_br0="enp34s0 tap1 tap2 tap3"<Br/>
 rc_net_br0_need="net.enp34s0 net.tap1 net.tap2 net.tap3"<Br/>
@@ -232,7 +247,7 @@ iproute2_tap2="user root"<Br/>
 config_tap3="null"<Br/>
 tuntap_tap3="tap"<Br/>
 iproute2_tap3="user root"<Br/>
-````
+```shell
 ln -s /etc/init.d/net.lo /etc/init.d/net.br0
 ln -s /etc/init.d/net.lo /etc/init.d/net.enp34s0
 ln -s /etc/init.d/net.lo /etc/init.d/net.tap1
@@ -243,28 +258,36 @@ rc-update add net.enp34s0 default
 rc-update add net.tap1 default
 rc-update add net.tap2 default
 rc-update add net.tap3 default
-````
+```
 ### 4.5 配置hosts
-`vi /etc/hosts`
+```shell
+vi /etc/hosts
+```
 >127.0.0.1 localhost<Br/>
 ::1 localhost<Br/>
 127.0.1.1 gentoo.localdomain gentoo
 ### 4.6 配置硬件时钟
-`vi /etc/conf.d/hwclock`
+```shell
+vi /etc/conf.d/hwclock
+```
 >clock="local"
 ### 4.7 配置密码规则
-`vi /etc/security/passwdqc.conf`<Br/>
-`passwd`
+```shell
+vi /etc/security/passwdqc.conf
+passwd
+```
 ### 4.8 (可选) 配置音频规则
-`vi /etc/security/limits.conf`
+```shell
+vi /etc/security/limits.conf
+```
 >@audio - rtprio 95<Br/>
 @audio - memlock unlimited
 ## 5. 安装工具
-```
+```shell
 emerge -av doas cronie eix zsh lsd gentoolkit dosfstools parted neofetch ntfs3g bpytop
 ```
 ## 6. 启用服务
-```
+```shell
 rc-update add zfs-import boot
 rc-update add zfs-mount boot
 rc-update add zfs-share default
@@ -273,7 +296,7 @@ rc-update add elogind boot
 rc-update add dbus default
 ```
 ## 7. 配置引导程序
-```
+```shell
 emerge --ask --verbose sys-boot/grub
 grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=Gentoo
 vi /etc/default/grub
@@ -283,17 +306,17 @@ grub-mkconfig -o /boot/grub/grub.cfg
 `GRUB_CMDLINE_LINUX="dozfs=cache quiet amd_iommu=on iommu=pt loglevel=5 nowatchdog"`<Br/>
 `GRUB_CMDLINE_LINUX_DEFAULT="spectre_v1=off spectre_v2=off spec_store_bypass_disable=off pti=off"`
 ## 8. 新建用户
-```
+```shell
 useradd -mG users,wheel,portage,usb,input,audio,video,sys,adm,tty,disk,lp,mem,news,console,cdrom,sshd,kvm,render,lpadmin,cron,crontab -s /bin/zsh jaus
 passwd jaus
 echo "permit keepenv nopass :wheel" > /etc/doas.conf
 ```
 ## 9. 使用zfs snapshot创建新系统快照
-```
+```shell
 zfs snapshot zroot/ROOT/default@install
 ```
 ## 10. 重启
-```
+```shell
 exit
 umount /mnt/gentoo/boot
 umount -Rl /mnt/gentoo/{dev,proc,sys,run,}
